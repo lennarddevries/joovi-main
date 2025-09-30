@@ -1,8 +1,10 @@
 services:
   web:
-    image: ghcr.io/lennarddevries/joovi-web:latest
-    platform: linux/amd64
-    container_name: joovi-web-prd
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+      target: production
+    container_name: joovi-web-e2e-prd
     ports:
       - "4321:4321"
     environment:
@@ -20,9 +22,11 @@ services:
       start_period: 30s
 
   server:
-    image: ghcr.io/lennarddevries/joovi-server:latest
-    platform: linux/amd64
-    container_name: joovi-server-prd
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+      target: production
+    container_name: joovi-server-e2e-prd
     ports:
       - "8000:8000"
     environment:

@@ -6,8 +6,8 @@ End-to-end tests for the Joovi application using Playwright.
 
 This test suite runs Playwright E2E tests against Docker containerized versions of the web and server applications. Tests can run in two modes:
 
-- **Dev Mode**: Tests against `:dev` Docker images from `ghcr.io/lennarddevries/joovi-web:dev` and `ghcr.io/lennarddevries/joovi-server:dev`
-- **Production Mode**: Tests against `:latest` Docker images from `ghcr.io/lennarddevries/joovi-web:latest` and `ghcr.io/lennarddevries/joovi-server:latest`
+- **Dev Mode**: Tests against locally built Docker images using `development` target
+- **Production Mode**: Tests against locally built Docker images using `production` target
 
 ## Prerequisites
 
@@ -74,7 +74,7 @@ npm run docker:down:prd
 ### Dev Environment
 
 ```bash
-# Start dev services (pulls :dev images)
+# Start dev services (builds development images)
 task docker:up:dev
 
 # Stop dev services
@@ -87,7 +87,7 @@ task docker:logs:dev
 ### Production Environment
 
 ```bash
-# Start production services (pulls :latest images)
+# Start production services (builds production images)
 task docker:up:prd
 
 # Stop production services
@@ -161,8 +161,8 @@ The `playwright.config.ts` file contains:
 
 ### Docker Compose
 
-- `compose/docker-compose.e2e-dev.yml` - E2E tests against `:dev` images from ghcr.io
-- `compose/docker-compose.e2e-prd.yml` - E2E tests against `:latest` images from ghcr.io
+- `compose/docker-compose.e2e-dev.yml` - E2E tests with development build target
+- `compose/docker-compose.e2e-prd.yml` - E2E tests with production build target
 - `compose/docker-compose.dev.yml` - Local development with live volumes
 
 All compose files define:
@@ -212,13 +212,6 @@ Check Docker logs:
 task docker:logs:dev
 # or
 task docker:logs:prd
-```
-
-### Authentication issues with ghcr.io
-
-Ensure you're logged in to GitHub Container Registry:
-```bash
-echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 ```
 
 ### Tests timing out

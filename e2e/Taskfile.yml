@@ -15,10 +15,9 @@ tasks:
 
   # Docker environment management
   docker:up:dev:
-    desc: Start dev environment (pulls :dev images from ghcr.io)
+    desc: Start dev environment (builds images locally)
     cmds:
-      - docker compose -f {{.COMPOSE_DEV}} pull
-      - docker compose -f {{.COMPOSE_DEV}} up -d
+      - docker compose -f {{.COMPOSE_DEV}} up -d --build
       - echo "Waiting for services to be healthy..."
       - sleep 10
 
@@ -28,10 +27,9 @@ tasks:
       - docker compose -f {{.COMPOSE_DEV}} down
 
   docker:up:prd:
-    desc: Start production environment (pulls :latest images from ghcr.io)
+    desc: Start production environment (builds images locally)
     cmds:
-      - docker compose -f {{.COMPOSE_PRD}} pull
-      - docker compose -f {{.COMPOSE_PRD}} up -d
+      - docker compose -f {{.COMPOSE_PRD}} up -d --build
       - echo "Waiting for services to be healthy..."
       - sleep 10
 
