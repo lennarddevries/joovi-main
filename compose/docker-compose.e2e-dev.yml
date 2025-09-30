@@ -1,6 +1,7 @@
 services:
   web:
     image: ghcr.io/lennarddevries/joovi-web:dev
+    platform: linux/amd64
     container_name: joovi-web-dev
     ports:
       - "4321:4321"
@@ -20,6 +21,7 @@ services:
 
   server:
     image: ghcr.io/lennarddevries/joovi-server:dev
+    platform: linux/amd64
     container_name: joovi-server-dev
     ports:
       - "8000:8000"
