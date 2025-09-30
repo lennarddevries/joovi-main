@@ -1,0 +1,50 @@
+services:
+  web:
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+      target: development
+    container_name: joovi-web-dev
+    ports:
+      - "4321:4321"
+    environment:
+      - NODE_ENV=development
+      - API_URL=http://server:8000
+    volumes:
+      - ../web:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    networks:
+      - joovi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4321"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  server:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+      target: development
+    container_name: joovi-server-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHON_ENV=development
+    volumes:
+      - ../server:/app
+    networks:
+      - joovi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  joovi-network:
+    driver: bridge

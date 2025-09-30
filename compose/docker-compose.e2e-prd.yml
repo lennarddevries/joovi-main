@@ -1,0 +1,39 @@
+services:
+  web:
+    image: ghcr.io/lennarddevries/joovi-web:latest
+    container_name: joovi-web-prd
+    ports:
+      - "4321:4321"
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://server:8000
+    depends_on:
+      - server
+    networks:
+      - joovi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4321"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  server:
+    image: ghcr.io/lennarddevries/joovi-server:latest
+    container_name: joovi-server-prd
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHON_ENV=production
+    networks:
+      - joovi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  joovi-network:
+    driver: bridge

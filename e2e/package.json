@@ -1,0 +1,32 @@
+{
+  "name": "joovi-e2e",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "End-to-end tests for joovi application",
+  "scripts": {
+    "test": "playwright test",
+    "test:dev": "TEST_ENV=dev playwright test",
+    "test:prd": "TEST_ENV=prd playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "docker:up:dev": "docker-compose -f ../compose/docker-compose.e2e-dev.yml up -d",
+    "docker:down:dev": "docker-compose -f ../compose/docker-compose.e2e-dev.yml down",
+    "docker:up:prd": "docker-compose -f ../compose/docker-compose.e2e-prd.yml up -d",
+    "docker:down:prd": "docker-compose -f ../compose/docker-compose.e2e-prd.yml down",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^22.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}
