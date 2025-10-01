@@ -1,0 +1,119 @@
+# https://taskfile.dev
+
+version: '3'
+
+includes:
+  web:
+    taskfile: ./web/Taskfile.yml
+    dir: ./web
+  server:
+    taskfile: ./server/Taskfile.yml
+    dir: ./server
+  e2e:
+    taskfile: ./e2e/Taskfile.yml
+    dir: ./e2e
+
+tasks:
+  # Meta tasks - Run across multiple projects
+  install:
+    desc: Install dependencies for all projects
+    cmds:
+      - task: web:install
+      - task: server:install
+      - task: e2e:install
+
+  lint:
+    desc: Run linting checks for all projects
+    cmds:
+      - task: web:lint
+      - task: server:lint
+      - task: e2e:lint
+
+  format:
+    desc: Format code for all projects
+    cmds:
+      - task: web:format
+      - task: server:format
+      - task: e2e:format
+
+  test:
+    desc: Run all tests (unit + integration + e2e)
+    cmds:
+      - task: web:test
+      - task: server:test
+      - echo "Running E2E tests..."
+      - task: e2e:test:dev
+
+  clean:
+    desc: Clean all projects
+    cmds:
+      - task: web:clean
+      - task: server:clean
+      - task: e2e:clean
+
+  # Git submodule management
+  submodules:update:
+    desc: Update all git submodules to latest
+    cmds:
+      - git submodule update --remote --merge
+
+  submodules:status:
+    desc: Show status of all git submodules
+    cmds:
+      - git submodule status
+
+  # Docker tasks
+  docker:build:
+    desc: Build Docker images for web and server
+    cmds:
+      - task: web:docker:build
+      - task: server:docker:build
+
+  docker:clean:
+    desc: Remove all Docker images
+    cmds:
+      - task: web:docker:clean
+      - task: server:docker:clean
+      - task: e2e:docker:clean
+
+  # Development workflows
+  dev:
+    desc: Start full development environment (web + server)
+    cmds:
+      - task: server:dev
+      - task: web:dev
+
+  dev:web:
+    desc: Start web development server
+    cmds:
+      - task: web:dev
+
+  dev:server:
+    desc: Start server development
+    cmds:
+      - task: server:dev
+
+  dev:docker:
+    desc: Start full development environment with docker-compose
+    dir: compose
+    cmds:
+      - docker compose -f docker-compose.dev.yml up
+
+  dev:docker:down:
+    desc: Stop development environment
+    dir: compose
+    cmds:
+      - docker compose -f docker-compose.dev.yml down
+
+  # Quick checks before commit
+  pre-commit:
+    desc: Run all checks before committing
+    cmds:
+      - task: lint
+      - task: test
+
+  # Help
+  help:
+    desc: Show available tasks
+    cmds:
+      - task --list-all

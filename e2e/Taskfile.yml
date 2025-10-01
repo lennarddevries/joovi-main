@@ -1,0 +1,134 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  COMPOSE_DEV: ../compose/docker-compose.e2e-dev.yml
+  COMPOSE_PRD: ../compose/docker-compose.e2e-prd.yml
+
+tasks:
+  # Development environment setup
+  install:
+    desc: Install dependencies
+    cmds:
+      - npm install
+      - npx playwright install chromium
+
+  # Docker environment management
+  docker:up:dev:
+    desc: Start dev environment (builds images locally)
+    cmds:
+      - docker compose -f {{.COMPOSE_DEV}} up -d --build
+      - echo "Waiting for services to be healthy..."
+      - sleep 10
+
+  docker:down:dev:
+    desc: Stop dev environment
+    cmds:
+      - docker compose -f {{.COMPOSE_DEV}} down
+
+  docker:up:prd:
+    desc: Start production environment (builds images locally)
+    cmds:
+      - docker compose -f {{.COMPOSE_PRD}} up -d --build
+      - echo "Waiting for services to be healthy..."
+      - sleep 10
+
+  docker:down:prd:
+    desc: Stop production environment
+    cmds:
+      - docker compose -f {{.COMPOSE_PRD}} down
+
+  docker:logs:dev:
+    desc: View dev environment logs
+    cmds:
+      - docker compose -f {{.COMPOSE_DEV}} logs -f
+
+  docker:logs:prd:
+    desc: View production environment logs
+    cmds:
+      - docker compose -f {{.COMPOSE_PRD}} logs -f
+
+  docker:clean:
+    desc: Clean all docker resources
+    cmds:
+      - docker compose -f {{.COMPOSE_DEV}} down -v
+      - docker compose -f {{.COMPOSE_PRD}} down -v
+
+  # Test tasks
+  test:dev:
+    desc: Run e2e tests against dev environment
+    deps:
+      - docker:up:dev
+    cmds:
+      - npm run test:dev
+      - defer: docker compose -f {{.COMPOSE_DEV}} down
+
+  test:prd:
+    desc: Run e2e tests against production environment
+    deps:
+      - docker:up:prd
+    cmds:
+      - npm run test:prd
+      - defer: docker compose -f {{.COMPOSE_PRD}} down
+
+  test:
+    desc: Run e2e tests (defaults to dev)
+    cmds:
+      - task: test:dev
+
+  test:headed:
+    desc: Run e2e tests in headed mode (dev environment)
+    deps:
+      - docker:up:dev
+    cmds:
+      - TEST_ENV=dev npm run test:headed
+      - defer: docker compose -f {{.COMPOSE_DEV}} down
+
+  test:debug:
+    desc: Run e2e tests in debug mode (dev environment)
+    deps:
+      - docker:up:dev
+    cmds:
+      - TEST_ENV=dev npm run test:debug
+      - defer: docker compose -f {{.COMPOSE_DEV}} down
+
+  test:ui:
+    desc: Open Playwright UI mode (dev environment)
+    deps:
+      - docker:up:dev
+    cmds:
+      - TEST_ENV=dev npm run test:ui
+      - defer: docker compose -f {{.COMPOSE_DEV}} down
+
+  test:report:
+    desc: Show test report
+    cmds:
+      - npm run test:report
+
+  # Code quality tasks
+  format:
+    desc: Format code using Prettier
+    cmds:
+      - npm run format
+
+  format:check:
+    desc: Check code formatting
+    cmds:
+      - npm run format:check
+
+  lint:
+    desc: Run ESLint
+    cmds:
+      - npm run lint
+
+  lint:fix:
+    desc: Fix ESLint issues
+    cmds:
+      - npm run lint:fix
+
+  # Utility tasks
+  clean:
+    desc: Clean test artifacts and dependencies
+    cmds:
+      - rm -rf node_modules playwright-report test-results .playwright
