@@ -1,6 +1,3 @@
-[submodule "docs"]
-	path = docs
-	url = https://github.com/lennarddevries/joovi-main.wiki.git
 [submodule "web"]
 	path = web
 	url = git@github.com:lennarddevries/joovi-web.git

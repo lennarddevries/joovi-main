@@ -3,6 +3,7 @@
 
 .claude/
 CLAUDE.md
+AGENTS.md
 
 # E2E Testing
 e2e/node_modules/
