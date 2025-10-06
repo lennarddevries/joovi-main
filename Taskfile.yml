@@ -99,11 +99,61 @@ tasks:
     cmds:
       - docker compose -f docker-compose.dev.yml up
 
+  dev:docker:build:
+    desc: Build and start development environment with docker-compose
+    dir: compose
+    cmds:
+      - docker compose -f docker-compose.dev.yml up --build
+
   dev:docker:down:
     desc: Stop development environment
     dir: compose
     cmds:
       - docker compose -f docker-compose.dev.yml down
+
+  dev:docker:logs:
+    desc: Follow logs from docker-compose services
+    dir: compose
+    cmds:
+      - docker compose -f docker-compose.dev.yml logs -f
+
+  dev:docker:migrate:
+    desc: Run database migrations in server container
+    dir: compose
+    cmds:
+      - docker compose -f docker-compose.dev.yml exec server poetry run alembic upgrade head
+
+  dev:docker:setup:
+    desc: Build, start, and migrate the full development environment
+    dir: compose
+    cmds:
+      - docker compose -f docker-compose.dev.yml up --build -d
+      - echo "Waiting for services to be healthy..."
+      - sleep 10
+      - docker compose -f docker-compose.dev.yml exec server poetry run alembic upgrade head
+      - echo "Services running at:"
+      - echo "- Web http://localhost:4321"
+      - echo "- API http://localhost:8000"
+      - echo "- API docs http://localhost:8000/docs"
+      - docker compose -f docker-compose.dev.yml logs -f
+
+  dev:docker:shell:web:
+    desc: Open shell in web container
+    dir: compose
+    cmds:
+      - docker compose -f docker-compose.dev.yml exec web sh
+
+  dev:docker:shell:server:
+    desc: Open shell in server container
+    dir: compose
+    cmds:
+      - docker compose -f docker-compose.dev.yml exec server sh
+
+  dev:docker:shell:postgres:
+    desc: Open psql in postgres container
+    dir: compose
+    cmds:
+      - docker compose -f docker-compose.dev.yml exec postgres psql -U joovi -d joovi
 
   # Quick checks before commit
   pre-commit:
