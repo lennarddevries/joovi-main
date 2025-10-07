@@ -40,10 +40,21 @@ services:
       - DB_USER=joovi
       - DB_PASSWORD=joovi_dev_password
       - DEBUG=true
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      - EMAIL_FROM=noreply@joovi.local
+      - EMAIL_FROM_NAME=Joovi
+      - FRONTEND_URL=http://localhost:4321
     volumes:
       - ../server:/app
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailhog:
         condition: service_healthy
     networks:
       - joovi-network
@@ -73,9 +84,67 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: joovi-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - joovi-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: joovi-mailhog-dev
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    networks:
+      - joovi-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8025"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  celery-worker:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+      target: development
+    container_name: joovi-celery-worker-dev
+    command: celery -A joovi.email.celery worker --loglevel=info
+    environment:
+      - PYTHON_ENV=development
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      - EMAIL_FROM=noreply@joovi.local
+      - EMAIL_FROM_NAME=Joovi
+      - FRONTEND_URL=http://localhost:4321
+    depends_on:
+      redis:
+        condition: service_healthy
+      mailhog:
+        condition: service_healthy
+    volumes:
+      - ../server:/app
+    networks:
+      - joovi-network
+    restart: unless-stopped
+
 networks:
   joovi-network:
     driver: bridge
 
 volumes:
   postgres-data:
+  redis-data:
