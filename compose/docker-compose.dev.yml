@@ -19,7 +19,7 @@ services:
       - joovi-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4321"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 5
       start_period: 30s
@@ -60,13 +60,14 @@ services:
       - joovi-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
+      interval: 60s
       timeout: 5s
       retries: 5
       start_period: 30s
 
   postgres:
-    image: postgres:16-alpine
+    image: postgis/postgis:16-3.4
+    platform: linux/amd64
     container_name: joovi-postgres-dev
     ports:
       - "5432:5432"
@@ -96,8 +97,8 @@ services:
       - joovi-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
+      interval: 30s
+      timeout: 5s
       retries: 5
 
   mailhog:
@@ -110,8 +111,8 @@ services:
       - joovi-network
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8025"]
-      interval: 5s
-      timeout: 3s
+      interval: 30s
+      timeout: 5s
       retries: 5
 
   celery-worker:
@@ -135,6 +136,7 @@ services:
       - EMAIL_FROM=noreply@joovi.local
       - EMAIL_FROM_NAME=Joovi
       - FRONTEND_URL=http://localhost:4321
+      - SKIP_MIGRATIONS=true
     depends_on:
       postgres:
         condition: service_healthy
