@@ -123,6 +123,11 @@ services:
     command: celery -A joovi.email.celery worker --loglevel=info
     environment:
       - PYTHON_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=joovi
+      - DB_USER=joovi
+      - DB_PASSWORD=joovi_dev_password
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - SMTP_HOST=mailhog
@@ -131,6 +136,8 @@ services:
       - EMAIL_FROM_NAME=Joovi
       - FRONTEND_URL=http://localhost:4321
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
       mailhog:
